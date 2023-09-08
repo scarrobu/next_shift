@@ -1,87 +1,104 @@
+# Import modulov
 import calendar
 import datetime
+from tkinter import *
 
-dateNow = datetime.datetime.now()
-year = dateNow.year
-month = dateNow.month
-day = int(input("When is your next shift (day)?: "))
-nextYear = year + 1
-date = datetime.date(year, month, day)
+# VLASTNÉ FUNCIE:
+# Zistí či sa môže jednať o mesiac nasledujúci
+def correct_month(input_day):
+    if date_today.day < next_shift:
+        return month_today
+    else:
+        answer__next_month = input("Jedná sa o nasledujúci mesiac?: ")
+        if answer__next_month == "a" or answer__next_month == "A":
+            return month_today + 1
+        else:
+            return month_today
+
+# Výpis správneho dňa v týždni
+def week_day(final_date):
+    if final_date == 0 or final_date == 7:
+        return "Pondelok"
+    elif final_date == 1 or final_date == 8:
+        return "Utorok"
+    elif final_date == 2:
+        return "Streda"
+    elif final_date == 3:
+        return "Štvrtok"
+    elif final_date == 4:
+        return "Piatok"
+    elif final_date == 5:
+        return "Sobota"
+    elif final_date == 6:
+        return "Nedeľa"
+
+# Určenie služby podľa zadaného dátumu
+def shift(create_date):
+    if my_next_shift in date_list:
+        return ("\nDňa %s, %s, máš dennú."%(my_next_shift,week_day(day_shift)))
+    elif my_next_shift-datetime.timedelta(days=1) in date_list:
+        return ("\n%s, %s, maš nočnú."%(my_next_shift,week_day(day_shift)))
+    elif my_next_shift-datetime.timedelta(days=2) in date_list:
+        return ("\n%s, %s, budeš po nočnej."%(my_next_shift,week_day(day_shift)))
+    elif my_next_shift-datetime.timedelta(days=3) in date_list:
+        return ("\n%s, %s, máš 1. volný deň."%(my_next_shift,week_day(day_shift)))
+    elif my_next_shift-datetime.timedelta(days=4) in date_list:
+        return ("%s, %s, máš 2. volný deň."%(my_next_shift,week_day(day_shift)))
+    else:
+        return "NEZNÁMA CHYBA!"
+
+# Základné premenné
+date_today = datetime.datetime.now()
+year_today = date_today.year
+month_today = date_today.month
+next_shift = int(input("Koľkého máš nasledujúcu službu: "))
+next_year_today = year_today + 1
+create_date = datetime.date(year_today, month_today, next_shift)
 date_list=[]
-query_year = int(input("Insert selected year: "))
-query_month = int(input("Insert selected month: "))
-query_day = int(input("Insert selected day: "))
-my_shift = datetime.date(query_year, query_month, query_day)
+input_year = int(input("Zadaj rok: "))
+input_month = int(input("Zadaj mesiac: "))
+input_day = int(input("Zadaj deň: "))
+my_next_shift = datetime.date(input_year, input_month, input_day)
+day_shift = calendar.weekday(input_year,input_month,input_day)
+year_today_count = int(365 / 5)
 
-wanted_shift = calendar.weekday(query_year,query_month,query_day)
-yearCount = int(365 / 5)
+# Úprava premennej month_today a date podľa výsledku funkcie correct_month(input_day)
+create_date = datetime.date(year_today, correct_month(input_day), next_shift)
 
-def correct_month(current_month):
-    if dateNow.day <= day:
-        return month
-    else:
-        return month + 1
+# Vytvorenie zoznamu všetkých dátumov
+date_list=[create_date + datetime.timedelta(days=5)]
 
-date = datetime.date(year, correct_month(day), day)
-date_list=[date + datetime.timedelta(days=5)]
+for x in range(year_today_count):
+    create_date += datetime.timedelta(days=5)
+    date_list.append(create_date)
 
-for x in range(yearCount):
-    date += datetime.timedelta(days=5)
-    date_list.append(date)
+print(shift(create_date))
 
-def weekDay(finalDate):
-    if finalDate == 0:
-        return "Monday"
-    if finalDate == 1:
-        return "Tuesday"
-    if finalDate == 2:
-        return "Wednesday"
-    if finalDate == 3:
-        return "Thursday"
-    if finalDate == 4:
-        return "Friday"
-    if finalDate == 5:
-        return "Saturday"
-    if finalDate == 6:
-        return "Sunday"
-
-def shift(date):
-    if my_shift in date_list:
-        return ("\nIn %s, %s, you have day-shift."%(my_shift,weekDay(wanted_shift)))
-    elif my_shift-datetime.timedelta(days=1) in date_list:
-        return ("\n%s, %s,you have night-shift."%(my_shift,weekDay(wanted_shift)))
-    elif my_shift-datetime.timedelta(days=2) in date_list:
-        return ("\n%s, %s, you will be after night-shift."%(my_shift,weekDay(wanted_shift)))
-    elif my_shift-datetime.timedelta(days=3) in date_list:
-        return ("\n%s, %s, you have 1. free day."%(my_shift,weekDay(wanted_shift)))
-    elif my_shift-datetime.timedelta(days=4) in date_list:
-        return ("%s, %s, you have 2. free day." % (my_shift, weekDay(wanted_shift)))
-    else:
-        return "UNKNOWN ERROR!"
-print(shift(date))
-
-print("You wish to show a list of all shifts\n")
-yn = input("Insert Y for YES, or N for NO: ")
+# Pokračovať vo výpise služieb
+print("Praješ si ukázať zoznam všetkých denných?\n")
+answer_dates = input("Zadaj A pre áno, alebo N pre nie: ")
 print()
 
-date = datetime.date(year, month, day)
-if yn == "y" or yn == "Y":
-    for i in range(yearCount):
-        while date < datetime.date(nextYear, 3, 1):
-            date += datetime.timedelta(days=5)
-            dateY = int(date.strftime("%Y"))
-            dateM = int(date.strftime("%m"))
-            dateD = int(date.strftime("%d"))
-            finalDate = calendar.weekday(dateY,dateM,dateD)
-            print(date, end= ", {}, you have day-shift\n".format(weekDay(finalDate)))
-            print(date+datetime.timedelta(days=1),
-                  end=", {}, you are before the night-shift \n".format(weekDay(finalDate+1)))
-            print(date+datetime.timedelta(days=2),
-                  end=", {}, you are after the night-shift\n".format(weekDay(finalDate+2)))
+# Výpis služieb do marca budúceho roku s dátumom, dňom a typom služby
+create_date = datetime.date(year_today, month_today, next_shift)
+if answer_dates == "a" or answer_dates == "A":
+    for i in range(year_today_count):
+        while create_date < datetime.date(next_year_today, 3, 1):
+            create_date += datetime.timedelta(days=5)
+            print_date_year = int(create_date.strftime("%Y"))
+            print_date_month = int(create_date.strftime("%m"))
+            print_date_day = int(create_date.strftime("%d"))
+
+            final_date = calendar.weekday(print_date_year,print_date_month,print_date_day)
+            print(create_date, end= ", {}, máš dennú\n".format(week_day(final_date)))
+            print(create_date+datetime.timedelta(days=1), 
+                  end= ", {}, si pred nočnou\n".format(week_day(final_date+1)))
+            print(create_date+datetime.timedelta(days=2), end= ", {}, si po nočnej\n".format(week_day(final_date+2)))
             print()
 
-    print("These are all shifts until March next year..")
-elif yn == "n" or yn == "N":
-    print("Thank you, goodbye")
+# Konečná komunikácia
+    print("Toto sú všetky služby do marca nasledujúceho roku. Ďakujem, dovidenia.")
+elif answer_dates == "n" or answer_dates == "N":
+    print("Ďakujem, dovidenia.")
 else:
-    print("Wrong choice, goodbye!")
+    print("Nesprávna voľba, dovidenia.")
